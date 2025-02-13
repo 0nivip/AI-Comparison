@@ -41,13 +41,6 @@ export const callAiModel1 = async (query: string, token: string): Promise<AiResp
     return { response_text: 'Ответ от модели 1' };
 };
 
-export const callAiModel2 = async (query: string, token: string): Promise<AiResponse> => {
-    // TODO: Реализовать вызов AI Model 2 с использованием токена
-    // Временная заглушка
-    console.log("Вызов AI Model 2 с query:", query);
-    return { response_text: 'Ответ от модели 2' };
-};
-
 export const callAiModel3 = async (query: string, token: string): Promise<AiResponse> => {
     // TODO: Реализовать вызов AI Model 3 с использованием токена
     // Временная заглушка

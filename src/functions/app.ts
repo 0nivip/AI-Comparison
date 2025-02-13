@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { callAiModel1, callAiModel2, callAiModel3 } from './aiRequest';
+import { callAiModel1, callAiModel3 } from './aiRequest';
 // Определяем интерфейсы для лучшей типобезопасности
 interface QueryRequest {
     query: string;
@@ -52,7 +52,6 @@ app.post('/api/query', validateQuery, async (req: Request, res: Response) => {
         // Вызываем AI модели, передавая query и token
         const responses = await Promise.all([
             callAiModel1(query, aiModel1Token),
-            callAiModel2(query, aiModel2Token),
             callAiModel3(query, aiModel3Token),
         ]);
 
