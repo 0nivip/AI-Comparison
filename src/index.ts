@@ -1,22 +1,52 @@
 import * as dotenv from 'dotenv';
-import app from './functions/app';
-import { processQuestionsWithGemini } from './functions/gemini';
-import { processQuestionsWithDeepSeek } from './functions/DeepSeek';
-import { processQuestionsWithCohere } from './functions/Cohere';
-
+import { callAiModel2 } from './functions/gemini';
+import { callAiModel1 } from './functions/GPT';
+import { callAiModel3 } from './functions/Cohere';
+import { callAiModel4 } from './functions/DeepSeek';
+import * as readline from 'readline';
 
 dotenv.config();
 
-console.log("AI model tokens successfully loaded.");
-
 async function runQueries() {
-  await processQuestionsWithGemini();
-//  await processQuestionsWithDeepSeek();
-  await processQuestionsWithCohere();
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
 
+    const question = await new Promise<string>((resolve) => {
+        rl.question('Enter a question: ', (answer) => {
+            rl.close();
+            resolve(answer);
+        });
+    });
+
+    const responses = await Promise.all([
+        callAiModel2(question),
+        callAiModel1(question),
+        callAiModel3(question),
+    ]);
+
+    const responsesJson = JSON.stringify(responses, null, 2);
+    console.log("Responses in JSON format:");
+    console.log(responsesJson);
+
+    const deepSeekPrompt = `Which of the following answers is better for the question "${question}"? Please provide your reasoning and return all three original answers along with your assessment.
+
+Answers:
+1. Gemini: ${responses[0].response_text}
+2. GPT: ${responses[1].response_text}
+3. Cohere: ${responses[2].response_text}`;
+
+
+    const deepSeekResponse = await callAiModel4(deepSeekPrompt);
+
+    console.log("\nDeepSeek Analysis:");
+    console.log(deepSeekResponse.response_text);
 }
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-  runQueries().catch(console.error);
-});
+async function main() {
+    await runQueries();
+}
+
+main();
+
