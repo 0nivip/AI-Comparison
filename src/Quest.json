@@ -1,28 +1,9 @@
 {
   "questions": [
-    {
-      "id": 1,
-      "question": "What is machine learning?"
-    },  
-    {
-      "id": 2,
-      "question": "What is the definition of irony?"
-    },  
-    {
-      "id": 3,
-      "question": "How can I improve my time management?"
-    },  
-    {
-      "id": 4,
-      "question": "What is the most relevant programming language on the EU exchange?"
-    },
-    {
-      "id": 5,
-      "question": "What is blockchain?"
-    }
+    "What is machine learning?",
+    "What is the definition of irony?",
+    "What is the most relevant programming language on the EU exchange?",
+    "How can I improve my time management?",
+    "What is blockchain?"
   ]
 }
-  
-    
-    
-    

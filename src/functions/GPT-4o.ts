@@ -5,9 +5,9 @@ import path from 'path';
 
 dotenv.config();
 
-const aiModel1Token = process.env.AI_MODEL_1_TOKEN;
+const aiModel4Token = process.env.AI_MODEL_4_TOKEN;
 
-if (!aiModel1Token) {
+if (!aiModel4Token) {
     throw new Error("API KEY is not set in the environment variables");
 }
  
@@ -18,21 +18,21 @@ interface AiResponse {
 }
 
 const openai = new OpenAI({
-    apiKey: aiModel1Token,
+    apiKey: aiModel4Token,
 });
 
 
-export async function callAiModel1(query: string): Promise<AiResponse> {
+export async function callAiModel4(query: string): Promise<AiResponse> {
     try {
         const completion = await openai.chat.completions.create({
             messages: [{ role: "user", content: query }], 
-            model: "gpt-4o-mini", 
+            model: "gpt-4o", 
             max_tokens: 1000,        
         });
         const generatedText = completion.choices[0].message.content; 
         return {
             response_text: generatedText ?? '',
-            model_name: "gpt-4o-mini" 
+            model_name: "gpt-4o" 
         };
     } catch (error) {
         console.error("Error generating content with GPT:", error);
@@ -57,7 +57,7 @@ export async function processQuestionsWithGPT() {
         }
 
         console.log(`Question: ${question}`);
-        const response = await callAiModel1(question);
+        const response = await callAiModel4(question);
         console.log(`GPT Answer: ${response.response_text}`);
         console.log('---');
       }
