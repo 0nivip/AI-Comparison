@@ -30,6 +30,7 @@
     "express": "^4.21.2",
     "g4f": "^1.4.6",
     "inquirer": "^12.4.1",
+    "lowdb": "^7.0.1",
     "node-fetch": "^3.3.2",
     "openai": "^4.85.0",
     "together-ai": "^0.13.0"
