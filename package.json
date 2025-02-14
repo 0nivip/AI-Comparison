@@ -18,9 +18,13 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@ai-sdk/deepseek": "^0.1.10",
+    "@ai-sdk/mistral": "^1.1.10",
     "@anthropic-ai/sdk": "^0.36.3",
     "@google/generative-ai": "^0.21.0",
+    "@mistralai/mistralai": "^1.5.0",
     "@types/express": "^5.0.0",
+    "cohere-ai": "^7.15.4",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",

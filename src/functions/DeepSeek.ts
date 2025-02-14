@@ -1,19 +1,21 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createDeepSeek, DeepSeekProviderSettings } from '@ai-sdk/deepseek';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
 
-
 dotenv.config();
 
-const aiModel2Token = process.env.AI_MODEL_2_TOKEN;
+const aiModel1Token = process.env.AI_MODEL_1_TOKEN;
 
-if (!aiModel2Token) {
+if (!aiModel1Token) {
   throw new Error("API KEY is not set in the environment variables");
 }
 
-const genAI = new GoogleGenerativeAI(aiModel2Token);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const deepseekSettings: DeepSeekProviderSettings = {
+  apiKey: aiModel1Token
+};
+
+const deepseek = createDeepSeek(deepseekSettings);
 
 interface AiResponse {
   response_text: string;
@@ -21,21 +23,25 @@ interface AiResponse {
   model_name?: string;
 }
 
-export async function callAiModel2(query: string): Promise<AiResponse> {
+export async function callAiModel1(query: string): Promise<AiResponse> {
   try {
-    const result = await model.generateContent(query);
-    const generatedText = result.response.text();
+    const result = await (deepseek as any).completions.create({
+      messages: [{ role: 'user', content: query }],
+      model: 'deepseek-chat',
+      max_tokens: 1000,
+    });
+    const generatedText = result.choices[0]?.message?.content || '';
     return {
       response_text: generatedText,
-      model_name: "Gemini-2.0-flash"
+      model_name: "DeepSeek-Chat"
     };
   } catch (error) {
-    console.error("Error generating content with Gemini:", error);
+    console.error("Error generating content with DeepSeek:", error);
     throw error;
   }
 }
 
-export async function processQuestionsWithGemini() {
+export async function processQuestionsWithDeepSeek() {
   try {
     const questPath = path.join(__dirname, '..', 'Quest.json');
     const questContent = await fs.readFile(questPath, 'utf-8');
@@ -47,8 +53,8 @@ export async function processQuestionsWithGemini() {
 
     for (const question of quest.questions) {
       console.log(`Question: ${question}`);
-      const response = await callAiModel2(question);
-      console.log(`Gemini Answer: ${response.response_text}`);
+      const response = await callAiModel1(question);
+      console.log(`DeepSeek Answer: ${response.response_text}`);
       console.log('---');
     }
   } catch (error) {
