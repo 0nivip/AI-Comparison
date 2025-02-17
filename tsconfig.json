@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
-        "target": "esnext",  // Or a suitable target for your environment
-        "module": "esnext", // Align with Bun's module resolution
-        "moduleResolution": "node",
+        "target": "ES2020",
+        "module": "commonjs",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,

@@ -7,136 +7,107 @@ import * as readline from 'readline';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import db, { saveResponse } from './functions/db';
-import { getBestAnswer } from './functions/Vote';
+import { getBestAnswer, BestAnswer } from './functions/Vote';
 
 // Загрузка переменных окружения
 dotenv.config();
 
+// Создание интерфейса readline один раз
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
 // Функция для отображения истории запросов и ответов
 async function showHistory() {
-    await db.read(); // Чтение данных из базы данных
-    if (!db.data || db.data.responses.length === 0) { // Проверка наличия данных
-        console.log("No responses saved yet."); // Вывод сообщения об отсутствии данных
+    await db.read();
+    if (!db.data || db.data.responses.length === 0) {
+        console.log("No responses saved yet."); // Сообщений нет
         return;
     }
 
-    // Перебор всех сохраненных ответов
     db.data.responses.forEach((response, index) => {
-        console.log(`\n--- Entry ${index + 1} ---`); // Вывод номера записи
-        console.log(`Question: ${response.question}`); // Вывод вопроса
-        console.log(`Gemini: ${response.gemini}`); // Вывод ответа Gemini
-        console.log(`GPT: ${response.gpt}`); // Вывод ответа GPT
-        console.log(`Cohere: ${response.cohere}`); // Вывод ответа Cohere
-        console.log(`GPT-4 Analysis: ${response.gpt4_analysis}`); // Вывод анализа GPT-4
-        console.log(`User Voice: ${response.userVoice}`); // Вывод голосового ввода пользователя
+        console.log(`\n--- Entry ${index + 1} ---`); // Запись номер ...
+        console.log(`Question: ${response.question}`); // Вопрос
+        console.log(`Gemini: ${response.gemini}`); // Ответ Gemini
+        console.log(`GPT: ${response.gpt}`); // Ответ GPT
+        console.log(`Cohere: ${response.cohere}`); // Ответ Cohere
+        console.log(`GPT-4 Analysis: ${response.gpt4_analysis}`); // Анализ GPT-4
+        console.log(`Chosen Model (Vote): ${response.Vote}`); // Выбранная модель
     });
 }
 
 // Функция для выполнения запросов к моделям
 async function runQueries() {
-    // Создание интерфейса для чтения строки ввода
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
+    while (true) {
+        const action = await new Promise<string>((resolve) => {
+            rl.question('(a)sk, (l)ist questions, (h)istory, or (e)xit? ', resolve);
+        });
 
-    try {
-        while (true) { // Бесконечный цикл для обработки запросов
-            let userVoice: string | null = null; // Переменная для голосового ввода пользователя
-            // Запрос действия от пользователя
-            const action = await new Promise<string>((resolve) => {
-                rl.question('(a)sk, (l)ist questions, (h)istory, or (e)xit? ', (answer) => {
-                    resolve(answer.toLowerCase()); // Преобразование ответа в нижний регистр
-                });
-            });
+        if (action === 'a' || action === 'l') {
+            let question: string;
 
-            // Обработка действия "задать вопрос" или "выбрать вопрос из списка"
-            if (action === 'a' || action === 'l') {
-                let question: string;
-
-                try {
+            try {
                     if (action === 'a') {
-                        // Запрос вопроса от пользователя
                         question = await new Promise<string>((resolve) => {
-                            rl.question('Enter a question: ', (answer) => {
-                                resolve(answer);
-                            });
+                            rl.question('Enter a question: ', resolve); // Запрос вопроса от пользователя
                         });
-                    } else { // action === 'l'
-                        // Чтение вопросов из файла Quest.json
-                        const questPath = path.join(__dirname, './', 'Quest.json');
-                        const questContent = await fs.readFile(questPath, 'utf-8');
-                        const quest = JSON.parse(questContent);
+                    } else {
+                        const questPath = path.join(__dirname, 'Quest.json'); // Путь к файлу с вопросами
+                        const questContent = await fs.readFile(questPath, 'utf-8'); // Чтение файла с вопросами
+                        const quest = JSON.parse(questContent); // Парсинг JSON
 
-                        // Валидация формата файла Quest.json
                         if (!quest.questions || !Array.isArray(quest.questions) || quest.questions.length < 5) {
-                            throw new Error('Invalid Quest.json format or not enough questions.');
+                            throw new Error('Invalid Quest.json format or not enough questions.'); // Ошибка формата файла с вопросами
                         }
 
-                        // Вывод первых 5 вопросов из файла
                         for (let i = 0; i < 5; i++) {
-                            console.log(`${i + 1}. ${quest.questions[i]}`);
+                            console.log(`${i + 1}. ${quest.questions[i]}`); // Вывод 5 вопросов на выбор
                         }
 
-                        // Запрос номера выбранного вопроса от пользователя
                         const chosenQuestionIndex = await new Promise<number>((resolve) => {
-                            rl.question('Choose a question number (1-5): ', (answer) => {
+                            rl.question('Choose a question number (1-5): ', (answer) => { // Запрос номера вопроса у пользователя
                                 const index = parseInt(answer) - 1;
                                 if (isNaN(index) || index < 0 || index >= 5) {
-                                    console.error("Invalid choice. Using the first question.");
-                                    resolve(0); // Использование первого вопроса по умолчанию при некорректном вводе
+                                    console.error("Invalid choice. Using the first question."); // Ошибка выбора, используется первый вопрос
+                                    resolve(0);
                                 } else {
                                     resolve(index);
                                 }
                             });
                         });
-                        question = quest.questions[chosenQuestionIndex];
+                        question = quest.questions[chosenQuestionIndex]; // Выбранный вопрос
                     }
 
-                    // Запрос голосового ввода пользователя (только при ручном вводе вопроса)
-                    if (action === 'a') {
-                        userVoice = await new Promise<string | null>((resolve) => {
-                            rl.question('Enter your voice input (or press Enter to skip): ', (answer) => {
-                                resolve(answer || null);
-                            });
-                        });
-                    }
 
-                    // Параллельный вызов всех моделей
                     const responses = await Promise.all([
-                        callAiModel2(question),
-                        callAiModel1(question),
-                        callAiModel3(question),
+                        callAiModel2(question), // Запрос к Gemini
+                        callAiModel1(question), // Запрос к GPT
+                        callAiModel3(question), // Запрос к Cohere
                     ]);
 
-                    // Преобразование ответов в JSON формат и вывод в консоль
                     const responsesJson = JSON.stringify(responses, null, 2);
-                    console.log("Responses in JSON format:");
+                    console.log("Responses in JSON format:"); // Ответы в формате JSON
                     console.log(responsesJson);
 
-
-                    // Формирование запроса для GPT-4 для анализа ответов
                     const deepSeekPrompt = `Which of the following answers is better for the question "${question}"? Please provide your reasoning and return all three original answers along with your assessment.
 
 Answers:
 1. Gemini: ${responses[0].response_text}
 2. GPT: ${responses[1].response_text}
-3. Cohere: ${responses[2].response_text}`;
+3. Cohere: ${responses[2].response_text}`; // Формирование запроса для GPT-4 для анализа ответов
 
-                    // Вызов GPT-4 для анализа
-                    const deepSeekResponse = await callAiModel4(deepSeekPrompt);
+                    const deepSeekResponse = await callAiModel4(deepSeekPrompt); // Запрос к GPT-4 для анализа
 
-                    // Вывод анализа GPT-4
-                    console.log("\nGPT-4 Analysis:");
+                    console.log("\nGPT-4 Analysis:"); // Анализ GPT-4
                     console.log(deepSeekResponse.response_text);
 
-                    // Запрос выбора лучшего ответа от пользователя
-                    const bestAnswer = await getBestAnswer(question, {
+                    const bestAnswer: BestAnswer | null = await getBestAnswer(question, {
                         gemini: responses[0].response_text,
                         gpt: responses[1].response_text,
                         cohere: responses[2].response_text,
                     });
-
+    
                     let chosenModel = null;
                     if (bestAnswer) {
                         console.log(`\nYou chose: ${bestAnswer.answer} (from ${bestAnswer.model})`);
@@ -144,43 +115,40 @@ Answers:
                     } else {
                         console.log("\nNo best answer selected.");
                     }
-
-                    // Сохранение результатов в базу данных
+    
                     await saveResponse(
                         question,
                         responses[0].response_text,
                         responses[1].response_text,
                         responses[2].response_text,
                         deepSeekResponse.response_text,
-                        userVoice,
-                        chosenModel
+                        chosenModel ? chosenModel : null 
                     );
-
+    
                     console.log('Response saved to db.json');
-
+    
                 } catch (error) {
                     console.error('Error processing question or saving response:', error);
                 }
-
-            // Обработка действия "показать историю"
+    
             } else if (action === 'h') {
                 await showHistory();
-            // Обработка действия "выйти"
             } else if (action === 'e') {
-                break; // Выход из цикла
-            // Обработка некорректного ввода
+                console.log("Exiting the application. Goodbye!");
+                return; // Выход из функции runQueries
             } else {
                 console.log("Invalid input. Please enter 'a', 'l', 'h', or 'e'.");
             }
+            
         }
-    } finally {
-        rl.close(); // Закрытие интерфейса чтения строки ввода
     }
-}
-
-
-async function main() {
-    await runQueries();
-}
-
-main();
+    
+    async function main() {
+        try {
+            await runQueries();
+        } finally {
+            rl.close(); // Закрываем интерфейс readline только при выходе из приложения
+        }
+    }
+    
+    main();

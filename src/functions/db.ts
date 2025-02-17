@@ -9,8 +9,7 @@ interface Data {
       gpt: string | null; // Ответ GPT
       cohere: string | null; // Ответ Cohere
       gpt4_analysis: string | null; // Анализ GPT-4
-      userVoice: string | null; // Голосовой ввод пользователя
-      chosenModel: string | null; // Выбранная пользователем модель (лучший ответ)
+      Vote: string | null; // Выбранная пользователем модель (лучший ответ)
     }[];
 }
 
@@ -31,10 +30,9 @@ const db = new Low<Data>(adapter, { responses: [] });
  * @param gpt Ответ GPT.
  * @param cohere Ответ Cohere.
  * @param gpt4_analysis Анализ GPT-4.
- * @param userVoice Голосовой ввод пользователя.
- * @param chosenModel Выбранная пользователем модель.
+ * @param Vote Выбранная пользователем модель.
  */
-async function saveResponse(question: string, gemini: string | null, gpt: string | null, cohere: string | null, gpt4_analysis: string | null, userVoice: string | null, chosenModel: string | null) {
+async function saveResponse(question: string, gemini: string | null, gpt: string | null, cohere: string | null, gpt4_analysis: string | null, Vote: string | null) {
     // Добавление нового ответа в массив responses
     db.data!.responses.push({
       question,
@@ -42,8 +40,7 @@ async function saveResponse(question: string, gemini: string | null, gpt: string
       gpt,
       cohere,
       gpt4_analysis,
-      userVoice,
-      chosenModel,
+      Vote,
     });
     // Запись данных в файл
     await db.write();
