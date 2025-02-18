@@ -110,7 +110,7 @@ Answers:
     
                     let chosenModel = null;
                     if (bestAnswer) {
-                        console.log(`\nYou chose: ${bestAnswer.answer} (from ${bestAnswer.model})`);
+                        console.log(`\nYou chose: ${bestAnswer.model}`);
                         chosenModel = bestAnswer.model;
                     } else {
                         console.log("\nNo best answer selected.");
