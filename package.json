@@ -2,17 +2,16 @@
   "name": "ai-comparison",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "bun run src/index.ts",
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
+    "dev": "bun run src/index.ts",
     "test": "bun test"
   },
   "keywords": [],
   "author": "VIP",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/node": "^22.13.1",
     "ts-node": "^10.9.2",
