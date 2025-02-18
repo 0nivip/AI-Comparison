@@ -1,13 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import dotenv from 'dotenv';
-import fs from 'fs/promises';
-import path from 'path';
+import dotenv from "dotenv";
+import fs from "fs/promises";
+import path from "path";
+import env from "../helpers/env";
 
 // Загрузка переменных окружения
 dotenv.config();
 
 // Получение токена для Gemini API из переменных окружения
-const aiModel2Token = process.env.AI_MODEL_2_TOKEN;
+const aiModel2Token = env.GEMINI_API_KEY;
 
 if (!aiModel2Token) {
   throw new Error("API KEY is not set in the environment variables");
@@ -33,7 +34,7 @@ export async function callAiModel2(query: string): Promise<AiResponse> {
     const generatedText = result.response.text();
     return {
       response_text: generatedText,
-      model_name: "Gemini-2.0-flash"
+      model_name: "Gemini-2.0-flash",
     };
   } catch (error) {
     console.error("Error generating content with Gemini:", error);
@@ -45,13 +46,13 @@ export async function callAiModel2(query: string): Promise<AiResponse> {
 export async function processQuestionsWithGemini() {
   try {
     // Чтение вопросов из файла Quest.json
-    const questPath = path.join(__dirname, '..', 'Quest.json');
-    const questContent = await fs.readFile(questPath, 'utf-8');
+    const questPath = path.join(__dirname, "..", "Quest.json");
+    const questContent = await fs.readFile(questPath, "utf-8");
     const quest = JSON.parse(questContent);
 
     // Проверка корректности формата JSON
     if (!quest.questions || !Array.isArray(quest.questions)) {
-      throw new Error('Invalid Quest.json format');
+      throw new Error("Invalid Quest.json format");
     }
 
     // Цикл по всем вопросам в файле
@@ -60,9 +61,9 @@ export async function processQuestionsWithGemini() {
       // Вызов Gemini API для каждого вопроса
       const response = await callAiModel2(question);
       console.log(`Gemini Answer: ${response.response_text}`);
-      console.log('---');
+      console.log("---");
     }
   } catch (error) {
-    console.error('Error processing questions:', error);
+    console.error("Error processing questions:", error);
   }
 }

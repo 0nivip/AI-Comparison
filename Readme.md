@@ -32,12 +32,7 @@ npm install
 ```
 
 ## Configuration
->> Create a `.env` file in the project root and add your API keys and other necessary environment variables. 
-# For example: 
-```Don't forget to change them in the files assigned to them.```
-* OPENAI_API_KEY=your_openai_api_key
-* COHERE_API_KEY=your_cohere_api_key
-# Add other API keys as needed
+>> Create a `.env` file from `example.env` in the project root and add your API keys and other necessary environment variables. 
 
 ## Running the Application
 + Start the application with: ``npm run start`` or ``npm start``
@@ -54,6 +49,8 @@ AI-Comparison/
 │   │   ├── Cohere.ts        # Interacts with Cohere model
 │   │   ├── GPT-4o.ts        # Handles GPT-4 analysis
 │   │   └── db.ts            # Functions for history storage
+│   ├── helpers/
+│   │   └── env.ts           # Loads environment variables
 │   ├── index.ts             # Main CLI application entry point
 │   └── Quest.json           # Pre-defined questions for selection
 ├── db.json                  # JSON database to log interactions
