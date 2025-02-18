@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import fs from "fs/promises";
 import path from "path";
 import env from "../helpers/env";
+import { makeShorterPrompt } from "../helpers/prompt-tool";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -29,7 +30,7 @@ interface AiResponse {
 export async function callAiModel2(query: string): Promise<AiResponse> {
   try {
     // Вызов Gemini API с заданным вопросом
-    const result = await model.generateContent(query);
+    const result = await model.generateContent(makeShorterPrompt(query));
     // Извлечение текста ответа
     const generatedText = result.response.text();
     return {

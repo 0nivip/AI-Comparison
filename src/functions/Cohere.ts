@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import fs from "fs/promises";
 import path from "path";
 import env from "../helpers/env";
+import { makeShorterPrompt } from "../helpers/prompt-tool";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -31,7 +32,7 @@ export async function callAiModel3(query: string): Promise<AiResponse> {
     try {
         // Формирование запроса к Cohere API.  Важно: указание модели command-xlarge
         const result = await cohere.generate({
-            prompt: query,
+            prompt: makeShorterPrompt(query),
             model: "command-xlarge",
             maxTokens: 1000,
         });

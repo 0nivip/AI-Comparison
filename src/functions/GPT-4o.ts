@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import path from "path";
+import { makeShorterPrompt } from "../helpers/prompt-tool";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -30,7 +31,7 @@ export async function callAiModel4(query: string): Promise<AiResponse> {
     try {
         // Формирование запроса к GPT-4
         const completion = await openai.chat.completions.create({
-            messages: [{ role: "user", content: query }],
+            messages: [{ role: "user", content: makeShorterPrompt(query) }],
             model: "gpt-4o",
             max_tokens: 1000,
         });
