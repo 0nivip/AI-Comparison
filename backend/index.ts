@@ -1,13 +1,13 @@
 import * as dotenv from 'dotenv';
-import { callAiModel2 } from './functions/gemini';
-import { callAiModel1 } from './functions/GPT';
-import { callAiModel3 } from './functions/Cohere';
-import { callAiModel4 } from './functions/GPT-4o';
+import { callAiModel2 } from '../backend/functions/gemini';
+import { callAiModel1 } from '../backend/functions/GPT';
+import { callAiModel3 } from '../backend/functions/Cohere';
+import { callAiModel4 } from '../backend/functions/GPT-4o';
 import * as readline from 'readline';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import db, { saveResponse } from './functions/db';
-import { getBestAnswer, BestAnswer } from './functions/Vote';
+import db, { saveResponse } from '../backend/functions/db';
+import { getBestAnswer, BestAnswer } from '../backend/functions/Vote';
 
 // Загрузка переменных окружения
 dotenv.config();

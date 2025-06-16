@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 import { AuthPage } from './AuthPage';
 import './App.css';
 import './Auth.css';
-import { DragonLogo } from './DragonLogo';
+
 
 // User data interface
 interface User {
@@ -89,6 +89,7 @@ function App() {
       month: 'short'
     });
   };
+  
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -333,7 +334,7 @@ function App() {
               {/* Logo and chat title */}
               <div className="logo-section">
                 <div className="logo-icon">
-                  <DragonLogo size={20} />
+                  <img src="Logo.png" alt="Logo" style={{ width: 20, height: 20, verticalAlign: 'middle' }} />
                 </div>
                 <div className="logo-text">
                   <h1>{currentChat?.title || 'Dragon Assistant'}</h1>

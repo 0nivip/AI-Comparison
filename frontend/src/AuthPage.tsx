@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { DragonLogo } from './DragonLogo';
+
 
 // Simulated database (for demo, replace with real API/database in production)
-const usersDB: { id: string; name: string; email: string; password: string }[] = [];
+const USERS_KEY = 'dragon-assistant-users';
 
+function getUsers() {
+  const data = localStorage.getItem(USERS_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveUsers(users: any[]) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
 interface AuthPageProps {
   onLogin: (user: { id: string; name: string; email: string }) => void;
 }
@@ -48,11 +56,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
 
-    // Simulate API/database delay
     setTimeout(() => {
-      // Find user in the database
-      const user = usersDB.find(
-        u => u.email === loginForm.email && u.password === loginForm.password
+      const users = getUsers();
+      const user = users.find(
+        (u: any) => u.email === loginForm.email && u.password === loginForm.password
       );
 
       if (user) {
@@ -74,7 +81,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
 
-    // Password validation
     if (registerForm.password !== registerForm.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -87,15 +93,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       return;
     }
 
-    // Check if user already exists
-    const existingUser = usersDB.find(u => u.email === registerForm.email);
+    const users = getUsers();
+    const existingUser = users.find((u: any) => u.email === registerForm.email);
     if (existingUser) {
       setError('A user with this email already exists');
       setLoading(false);
       return;
     }
 
-    // Register new user in the database
     setTimeout(() => {
       const newUser = {
         id: Date.now().toString(),
@@ -103,7 +108,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
         email: registerForm.email,
         password: registerForm.password
       };
-      usersDB.push(newUser);
+      users.push(newUser);
+      saveUsers(users);
 
       onLogin({
         id: newUser.id,
@@ -129,7 +135,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
           {/* Logo and title */}
           <div className="auth-header">
             <div className="auth-logo">
-              <DragonLogo size={32} />
+              <img src="Logo.png" alt="Logo" style={{ width: 20, height: 20, verticalAlign: 'middle' }} />
             </div>
             <h1 className="auth-title">
               {isLogin ? 'Welcome!' : 'Create Account'}

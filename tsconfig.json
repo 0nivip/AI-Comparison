@@ -10,7 +10,7 @@
         "rootDir": "./src",
         "resolveJsonModule": true,
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "backend/functions"],
     "baseUrl": "./",
     "paths": {
       "*": ["src/*"]
