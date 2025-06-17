@@ -7,12 +7,12 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "rootDir": "./src",
         "resolveJsonModule": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": ["src/*"]
+        }
     },
-    "include": ["src/**/*", "backend/functions"],
-    "baseUrl": "./",
-    "paths": {
-      "*": ["src/*"]
-    }
+    "include": ["src/**/*", "functions"],
+    "exclude": ["dist"]
 }

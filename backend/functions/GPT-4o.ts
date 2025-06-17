@@ -32,7 +32,7 @@ export async function callAiModel4(query: string): Promise<AiResponse> {
         // Формирование запроса к GPT-4
         const completion = await openai.chat.completions.create({
             messages: [{ role: "user", content: makeShorterPrompt(query) }],
-            model: "gpt-4o",
+            model: "gpt-4", // Исправлено с "gpt-4o" на "gpt-4"
             max_tokens: 1000,
         });
         // Извлечение сгенерированного текста

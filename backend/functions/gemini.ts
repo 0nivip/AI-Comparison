@@ -17,7 +17,9 @@ if (!aiModel2Token) {
 
 // Инициализация клиента Google Generative AI  и указание модели gemini-2.0-flash
 const genAI = new GoogleGenerativeAI(aiModel2Token);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-pro" // Исправлено с "gemini-2.0-flash" на "gemini-pro"
+});
 
 // Интерфейс для ответа от AI
 interface AiResponse {

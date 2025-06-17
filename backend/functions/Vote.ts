@@ -1,36 +1,38 @@
 import * as readline from 'readline';
 
-// Интерфейс для ответов от API
+// Interface for API responses
 interface ApiResponse {
-  gemini: string | null; // Ответ Gemini
-  gpt: string | null; // Ответ GPT
-  cohere: string | null; // Ответ Cohere
+  gemini: string | null; // Gemini answer
+  gpt: string | null; // GPT answer
+  cohere: string | null; // Cohere answer
 }
 
-// Интерфейс для лучшего ответа
+// Interface for the best answer
 export interface BestAnswer {
-  model: string; // Название модели, давшей лучший ответ
-  answer: string | null; // Сам лучший ответ
+  model: string; // Model name that gave the best answer
+  answer: string | null; // The best answer itself
 }
 
-
-export async function getBestAnswer(question: string, responses: ApiResponse): Promise<BestAnswer | null> {
-  // Если ни одна модель не дала ответа, выводим сообщение и возвращаем null
+export async function getBestAnswer(
+  question: string,
+  responses: ApiResponse
+): Promise<BestAnswer | null> {
+  // If no model provided an answer, print a message and return null
   if (!responses.gemini && !responses.gpt && !responses.cohere) {
     console.log("No responses provided to vote on.");
     return null;
   }
 
-  // Создаем интерфейс для чтения ввода с консоли
+  // Create a readline interface for console input
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  // Выводим вопрос
+  // Print the question
   console.log(`Question: ${question}\n`);
 
-  // Создаем массив вариантов ответа
+  // Create an array of answer choices
   const choices: { key: string; value: string | null }[] = [];
   if (responses.gemini) {
     choices.push({ key: "Gemini", value: responses.gemini });
@@ -48,33 +50,32 @@ export async function getBestAnswer(question: string, responses: ApiResponse): P
   console.log();
 
   try {
-    // Цикл для запроса выбора лучшего ответа
+    // Loop to prompt for the best answer
     while (true) {
       const answer = await new Promise<string>(resolve => {
-        // Запрос выбора лучшего ответа у пользователя
         rl.question(
           `Which response is best? (${choices.map(c => c.key).join(", ")}, or s to skip): `,
           resolve
         );
       });
 
-      // Если пользователь ввел 's', пропускаем выбор лучшего ответа
+      // If user entered 's', skip selecting the best answer
       if (answer.toLowerCase() === "s") {
         return null;
       }
 
-      // Ищем выбранный вариант ответа в массиве choices
+      // Find the selected answer in the choices array
       const selectedChoice = choices.find(c => c.key === answer);
       if (selectedChoice) {
-        // Возвращаем выбранный ответ и название модели
+        // Return the selected answer and model name
         return { model: selectedChoice.key, answer: selectedChoice.value };
       } else {
-        // Выводим сообщение об ошибке, если выбран неверный вариант
+        // Print error message if invalid choice
         console.log("Invalid choice. Please try again.");
       }
     }
   } finally {
-    // Закрываем интерфейс чтения ввода
+    // Close the readline interface
     rl.close();
   }
 }

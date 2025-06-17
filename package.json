@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "bun run src/index.ts",
+    "start": "bun run backend/index.ts",
     "build": "tsc",
     "dev": "bun run src/index.ts",
     "test": "bun test"
@@ -20,6 +20,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@fastify/cors": "^11.0.1",
     "@google/generative-ai": "^0.21.0",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
@@ -27,6 +28,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "fastify": "^5.4.0",
+    "koa": "^3.0.0",
     "lowdb": "^7.0.1",
     "openai": "^4.85.0",
     "sqlite3": "^5.1.7"

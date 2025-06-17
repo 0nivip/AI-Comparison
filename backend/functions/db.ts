@@ -1,51 +1,56 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 
-// Определение интерфейса для данных, хранящихся в базе данных
+// Interface for the data stored in the database
 interface Data {
-    responses: { // Массив ответов
-      question: string; // Вопрос пользователя
-      gemini: string | null; // Ответ Gemini
-      gpt: string | null; // Ответ GPT
-      cohere: string | null; // Ответ Cohere
-      gpt4_analysis: string | null; // Анализ GPT-4
-      Vote: string | null; // Выбранная пользователем модель (лучший ответ)
+    responses: { // Array of responses
+      question: string; // User question
+      gemini: string | null; // Gemini answer
+      gpt: string | null; // GPT answer
+      cohere: string | null; // Cohere answer
+      gpt4_analysis: string | null; // GPT-4 analysis
+      vote: string | null; // User-selected model (best answer)
     }[];
 }
 
-// Адаптер для работы с JSON файлом
+// Adapter for working with a JSON file
 const adapter = new JSONFile<Data>('db.json');
-// Инициализация базы данных LowDB с заданным адаптером и начальными данными
+// Initialize LowDB database with the specified adapter and initial data
 const db = new Low<Data>(adapter, { responses: [] }); 
 
-// Асинхронное чтение данных из файла при запуске
+// Asynchronously read data from file on startup
 (async () => {
     await db.read();
 })();
 
 /**
- * Функция для сохранения ответа в базу данных.
- * @param question Вопрос пользователя.
- * @param gemini Ответ Gemini.
- * @param gpt Ответ GPT.
- * @param cohere Ответ Cohere.
- * @param gpt4_analysis Анализ GPT-4.
- * @param Vote Выбранная пользователем модель.
+ * Function to save a response to the database.
+ * @param question User question.
+ * @param gemini Gemini answer.
+ * @param gpt GPT answer.
+ * @param cohere Cohere answer.
+ * @param gpt4_analysis GPT-4 analysis.
+ * @param vote User-selected model.
  */
-async function saveResponse(question: string, gemini: string | null, gpt: string | null, cohere: string | null, gpt4_analysis: string | null, Vote: string | null) {
-    // Добавление нового ответа в массив responses
+async function saveResponse(
+  question: string,
+  gemini: string | null,
+  gpt: string | null,
+  cohere: string | null,
+  gpt4_analysis: string | null,
+  vote: string | null
+) {
     db.data!.responses.push({
       question,
       gemini,
       gpt,
       cohere,
       gpt4_analysis,
-      Vote,
+      vote,
     });
-    // Запись данных в файл
     await db.write();
-  }
+}
 
-// Экспорт базы данных и функции saveResponse
+// Export the database and saveResponse function
 export default db;
 export { saveResponse };

@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import env from "../helpers/env";
 import { makeShorterPrompt } from "../helpers/prompt-tool";
+import fetch from "node-fetch";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -72,4 +73,38 @@ export async function processQuestionsWithCohere() {
     } catch (error) {
         console.error("Error processing questions:", error);
     }
+}
+
+/**
+ * Get a response from Cohere API for a given prompt.
+ * @param prompt The user's question.
+ * @returns The answer from Cohere or null if an error occurs.
+ */
+export async function getCohereResponse(prompt: string): Promise<string | null> {
+  try {
+    const response = await fetch("https://api.cohere.ai/v1/chat", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.COHERE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: prompt,
+        model: "command-r-plus",
+        temperature: 0.3,
+        max_tokens: 512,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Cohere API error:", response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.text ?? null;
+  } catch (error) {
+    console.error("Cohere API request failed:", error);
+    return null;
+  }
 }

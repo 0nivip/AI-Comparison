@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Sparkles, User, Bot, Menu, X, LogOut } from 'lucide-react';
+import { Send, Sparkles, User, Bot, Menu, X, LogOut, ChevronUp, Brain, Cpu, Stars } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { AuthPage } from './AuthPage';
 import './App.css';
@@ -30,6 +30,33 @@ interface Message {
   timestamp: string;
 }
 
+const AI_MODELS = [
+  {
+    id: 'dragon', // Dragon model - development
+    name: 'Dragon',
+    icon: Cpu, 
+    color: '#f97316' 
+  },
+  { 
+    id: 'cohere', 
+    name: 'Cohere',
+    icon: Brain, 
+    color: '#e11d48' 
+  },
+  { 
+    id: 'gpt4', // GPT-4 model - development
+    name: 'GPT-4',
+    icon: Sparkles,
+    color: '#10b981'
+  },
+  { 
+    id: 'gemini', // Gemini model - development
+    name: 'Gemini',
+    icon: Stars, 
+    color: '#6366f1'
+  }
+];
+
 function App() {
   // State hooks
   const [user, setUser] = useState<User | null>(null);
@@ -38,6 +65,8 @@ function App() {
   const [inputValue, setInputValue] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(AI_MODELS[0]);
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize welcome chat when user logs in
@@ -132,35 +161,6 @@ function App() {
     return () => document.removeEventListener('keydown', handleEscapeKey);
   }, [sidebarOpen]);
 
-  // Generate assistant's response based on user message
-  const generateAssistantResponse = (userMessage: string): string => {
-    const responses = [
-      "That's an interesting question! I'm ready to help you with this topic.",
-      "I understand your situation. Let's look at some possible solutions.",
-      "Great question! This is a demo of a Claude-style interface.",
-      "I'm analyzing your request and will provide detailed information.",
-      "That's an important topic. Let me share my knowledge on this.",
-      "Interesting! I see you're interested in this area. Let's discuss details.",
-    ];
-
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      return `Hello, ${user?.name}! How can I help you today?`;
-    }
-    if (lowerMessage.includes('how are you')) {
-      return "I'm doing great! I'm here to help you with any questions.";
-    }
-    if (lowerMessage.includes('programming') || lowerMessage.includes('code')) {
-      return "Programming is a fascinating field! I can help with various languages and technologies. What exactly interests you?";
-    }
-    if (lowerMessage.includes('help')) {
-      return "Of course! I'm ready to help. Please describe what you need assistance with.";
-    }
-
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
   // Handle sending a message
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !currentChat) return;
@@ -175,7 +175,6 @@ function App() {
 
     const updatedMessages = [...messages, newMessage];
 
-    // Update chat with new user message
     setChats(prevChats =>
       prevChats.map(chat =>
         chat.id === activeChat
@@ -192,30 +191,30 @@ function App() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate assistant response with delay
-    setTimeout(() => {
-      const assistantResponse: Message = {
-        id: updatedMessages.length + 1,
-        type: 'assistant',
-        content: generateAssistantResponse(inputValue),
-        timestamp: formatTimestamp(new Date())
-      };
+    // Pass selectedModel to the function
+    const assistantText = await fetchCohereAnswer(inputValue, selectedModel);
 
-      setChats(prevChats =>
-        prevChats.map(chat =>
-          chat.id === activeChat
-            ? {
-                ...chat,
-                messages: [...updatedMessages, assistantResponse],
-                lastMessage: assistantResponse.content,
-                timestamp: assistantResponse.timestamp
-              }
-            : chat
-        )
-      );
+    const assistantResponse: Message = {
+      id: updatedMessages.length + 1,
+      type: 'assistant',
+      content: assistantText,
+      timestamp: formatTimestamp(new Date())
+    };
 
-      setIsTyping(false);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === activeChat
+          ? {
+              ...chat,
+              messages: [...updatedMessages, assistantResponse],
+              lastMessage: assistantResponse.content,
+              timestamp: assistantResponse.timestamp
+            }
+          : chat
+      )
+    );
+
+    setIsTyping(false);
   };
 
   // Handle Enter key for sending message
@@ -416,6 +415,35 @@ function App() {
           <div className="input-area">
             <div className="input-container">
               <div className="input-wrapper">
+                <div className="model-select">
+                  <button
+                    className="model-button"
+                    onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+                    title="Select AI Model"
+                    style={{ background: selectedModel.color }}
+                  >
+                    {React.createElement(selectedModel.icon, { size: 20 })}
+                  </button>
+                  {modelDropdownOpen && (
+                    <div className="model-dropdown">
+                      {AI_MODELS.map((model) => (
+                        <div
+                          key={model.id}
+                          className={`model-option ${selectedModel.id === model.id ? 'active' : ''}`}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            setModelDropdownOpen(false);
+                          }}
+                        >
+                          <div className="model-icon" style={{ color: model.color }}>
+                            {React.createElement(model.icon, { size: 16 })}
+                          </div>
+                          {model.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
@@ -450,6 +478,20 @@ function App() {
       </div>
     </div>
   );
+}
+
+async function fetchCohereAnswer(prompt: string, model: { id: string, name: string }): Promise<string> {
+  try {
+    const response = await fetch(`http://localhost:3001/api/${model.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await response.json();
+    return data.answer || "Sorry, I couldn't get a response.";
+  } catch {
+    return "Sorry, there was an error connecting to the assistant.";
+  }
 }
 
 export default App;
